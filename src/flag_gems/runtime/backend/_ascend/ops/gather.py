@@ -9,6 +9,8 @@ from flag_gems.utils import libentry
 from flag_gems.utils.shape_utils import restride_dim
 
 logger = logging.getLogger(f'flag_gems.runtime._ascend.ops.{__name__.split(".")[-1]}')
+# Hardware specification: Atlas 800T/I A2 product's on-chip memory capacity is 192KB
+UB_SIZE_BYTES = 192 * 1024
 
 
 def compute_base_offset(shape, strides, dim):
@@ -154,7 +156,6 @@ def gather(inp, dim, index, out=None, sparse_grad=False):
         + index.size(-1) * index.element_size()
         + index.size(-1) * inp.element_size()
     )
-    UB_SIZE_BYTES = 192 * 1024
 
     if is_last_dim and inp.dim() == 2 and total_bytes < UB_SIZE_BYTES:
         out = gather_high_perf(inp, index, out)
